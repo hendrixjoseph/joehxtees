@@ -1,0 +1,7 @@
+.classpath
+.project
+.settings/
+_site/
+*.jpg
+target/
+_site/
