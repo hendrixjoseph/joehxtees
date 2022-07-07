@@ -3,3 +3,25 @@ ul {
   margin-right: auto;
   width: fit-content;
 }
+
+img {
+  width: 700px;
+}
+
+.shirt {
+  display: flex;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.shirt > div {
+  margin: 0 auto;
+}
+
+.shirt div:nth-child(2) {
+  margin-top: 65px;
+}
+
+.share-block {
+  max-width: 700px;
+}
