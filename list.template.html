@@ -3,17 +3,12 @@
 <title>List of T-Shirts</title>
 <link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="list.css" />
-<script>
-let filter = input => {
-  Array.from(document.querySelectorAll('.shirt'))
-    .forEach(shirt => shirt.hidden = !shirt.textContent.toLowerCase().includes(input.value.toLowerCase()))
-}
-</script>
+<script src="list.js"></script>
 </head>
 <body>
 <header>
   <h1>JoeHx Tees</h1>
-  <input type="text" placeholder="Search for a shirt..." oninput="filter(this)">
+  <input type="text" placeholder="Search for a shirt..." oninput="inputFilter(this)">
 </header>
 <div class="container">
 {{ content }}

@@ -19,7 +19,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -44,17 +48,36 @@ public class TeeProcessor {
 	private final String teeTemplate;
 	private final String detailTemplate;
 
+	@FunctionalInterface
+	private static interface ExConsumer<T, E extends IOException> {
+	    void accept(T t) throws IOException;
+	}
+
+	private static <T, E extends IOException> Function<T, IOException> throwMapper(final ExConsumer<T, E> c) {
+	    return t -> {
+	        try {
+	            c.accept(t);
+	            return null;
+	        }
+	        catch (final IOException e) {
+	            return e;
+	        }
+	    };
+	}
+
 	public static void delete() throws IOException {
-		Files.walk(Path.of(SITE_DIR))
-			.sorted(Comparator.reverseOrder())
-			.forEach(t -> {
-			try {
-				Files.delete(t);
-			} catch (final IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (Files.exists(Path.of(SITE_DIR))) {
+			final Optional<IOException> e =
+				Files.walk(Path.of(SITE_DIR))
+					.sorted(Comparator.reverseOrder())
+					.map(throwMapper(Files::delete))
+					.filter(Objects::nonNull)
+					.findFirst();
+
+			if(!e.isEmpty()) {
+				throw e.get();
 			}
-		});
+		}
 	}
 
 	public TeeProcessor() throws IOException {
@@ -90,24 +113,17 @@ public class TeeProcessor {
 		reader.close();
 	}
 
-	public void createDetailPages() {
-		this.teeHtmls.entrySet().stream().forEach(entry -> {
-			final Tee tee = entry.getKey();
-			final String teeHtml = entry.getValue();
+	public void createDetailPages() throws IOException {
+		final Optional<IOException> e =
+			this.teeHtmls.entrySet()
+				.stream()
+				.map(throwMapper(this::createDetailPage))
+				.filter(Objects::nonNull)
+				.findFirst();
 
-			final String detailHtml = templatize(this.detailTemplate, tee)
-					.replace(CONTENT, teeHtml.replaceAll("##unless-list.+", "")
-					.replace(IMAGE, IMAGE_FILENAME));
-
-			final Path dir = Paths.get(SITE_DIR, tee.getPath());
-
-			try (Writer detail = new FileWriter(dir.toString() + "/index.html")) {
-				Files.createDirectories(dir);
-				detail.write(detailHtml);
-			} catch (final IOException e) {
-				e.printStackTrace();
-			}
-		});
+		if(!e.isEmpty()) {
+			throw e.get();
+		}
 	}
 
 	public void createIndex() throws IOException {
@@ -157,7 +173,7 @@ public class TeeProcessor {
 
 	public void copyStaticFiles() throws IOException {
 		Files.list(Path.of(""))
-			.filter(path -> path.toString().endsWith("css"))
+			.filter(path -> path.toString().endsWith("css") || path.toString().endsWith("js"))
 			.forEach(file -> {
 				try {
 					Files.copy(file, Path.of(SITE_DIR, file.toString()));
@@ -165,6 +181,26 @@ public class TeeProcessor {
 					e.printStackTrace();
 				}
 			});
+	}
+
+	private void createDetailPage(final Entry<Tee, String> entry) throws IOException {
+		createDetailPage(entry.getKey(), entry.getValue());
+	}
+
+	private void createDetailPage(final Tee tee,  final String teeHtml) throws IOException {
+		final String detailHtml = templatize(this.detailTemplate, tee)
+				.replace(CONTENT, teeHtml.replaceAll("##unless-list.+", "")
+				.replace(IMAGE, IMAGE_FILENAME));
+
+		final Path dir = Paths.get(SITE_DIR, tee.getPath());
+
+		Files.createDirectories(dir);
+
+		final Writer detail = new FileWriter(dir.toString() + "/index.html");
+
+		detail.write(detailHtml);
+
+		detail.close();
 	}
 
 	private String templatize(final String template, final Tee tee) {

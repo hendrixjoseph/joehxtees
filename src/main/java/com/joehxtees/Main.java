@@ -8,16 +8,13 @@ public class Main {
 
 		TeeProcessor.delete();
 
-		//final TeeProcessor processor = new TeeProcessor();
+		final TeeProcessor processor = new TeeProcessor();
 
-
-
-
-
+		processor.createDetailPages();
+		processor.createIndex();
+		processor.createSiteMap();
+		processor.copyStaticFiles();
 
 		System.out.println("Done!");
 	}
-
-
-
 }
