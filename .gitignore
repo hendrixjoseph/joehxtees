@@ -3,5 +3,6 @@
 .settings/
 _site/
 *.jpg
+*.png
 target/
 _site/
