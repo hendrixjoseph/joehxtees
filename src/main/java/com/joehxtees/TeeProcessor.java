@@ -1,6 +1,8 @@
 package com.joehxtees;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -25,6 +27,7 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -67,16 +70,22 @@ public class TeeProcessor {
 
 	public static void delete() throws IOException {
 		if (Files.exists(Path.of(SITE_DIR))) {
-			final Optional<IOException> e =
+			throwFirstIOException(
 				Files.walk(Path.of(SITE_DIR))
 					.sorted(Comparator.reverseOrder())
 					.map(throwMapper(Files::delete))
-					.filter(Objects::nonNull)
-					.findFirst();
+			);
+		}
+	}
 
-			if(!e.isEmpty()) {
-				throw e.get();
-			}
+	private static void throwFirstIOException(final Stream<IOException> stream) throws IOException {
+		final Optional<IOException> e =
+			stream
+				.filter(Objects::nonNull)
+				.findFirst();
+
+		if(!e.isEmpty()) {
+			throw e.get();
 		}
 	}
 
@@ -113,17 +122,19 @@ public class TeeProcessor {
 		reader.close();
 	}
 
+	public void downloadImages() throws IOException {
+		throwFirstIOException(
+			this.tees.stream()
+				.map(throwMapper(this::downloadImage))
+		);
+	}
+
 	public void createDetailPages() throws IOException {
-		final Optional<IOException> e =
+		throwFirstIOException(
 			this.teeHtmls.entrySet()
 				.stream()
 				.map(throwMapper(this::createDetailPage))
-				.filter(Objects::nonNull)
-				.findFirst();
-
-		if(!e.isEmpty()) {
-			throw e.get();
-		}
+		);
 	}
 
 	public void createIndex() throws IOException {
@@ -192,15 +203,21 @@ public class TeeProcessor {
 				.replace(CONTENT, teeHtml.replaceAll("##unless-list.+", "")
 				.replace(IMAGE, IMAGE_FILENAME));
 
-		final Path dir = Paths.get(SITE_DIR, tee.getPath());
-
-		Files.createDirectories(dir);
+		final Path dir = createTeeDirectory(tee);
 
 		final Writer detail = new FileWriter(dir.toString() + "/index.html");
 
 		detail.write(detailHtml);
 
 		detail.close();
+	}
+
+	private Path createTeeDirectory(final Tee tee) throws IOException {
+		final Path dir = Paths.get(SITE_DIR, tee.getPath());
+
+		Files.createDirectories(dir);
+
+		return dir;
 	}
 
 	private String templatize(final String template, final Tee tee) {
@@ -212,11 +229,26 @@ public class TeeProcessor {
 	}
 
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
+		final Path dir = createTeeDirectory(tee);
+
 		final BufferedImage image = ImageIO.read(new URL(tee.getImageSrc()));
 
 		final BufferedImage newImage = eraseBackground(image);
+		final BufferedImage resizedImage = resizeImage(newImage);
 
-		ImageIO.write(newImage, "png", new File(SITE_DIR + "/" + tee.getPath() + "image.png"));
+		ImageIO.write(resizedImage, "png", new File(dir.toString() + "image.png"));
+	}
+
+	private BufferedImage resizeImage(final BufferedImage image) {
+		final Image resized = image.getScaledInstance(700, -1, Image.SCALE_SMOOTH);
+
+		final BufferedImage resizedBuffer = new BufferedImage(resized.getWidth(null), resized.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+	    final Graphics2D g2d = resizedBuffer.createGraphics();
+	    g2d.drawImage(resized, 0, 0, null);
+	    g2d.dispose();
+
+	    return resizedBuffer;
 	}
 
 
