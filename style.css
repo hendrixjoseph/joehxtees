@@ -1,0 +1,54 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+footer {
+  margin: 0.5rem;
+}
+
+h1, h2, header, footer {
+  text-align: center;
+}
+
+img {
+  margin: 0 auto;
+  display: block;
+}
+
+.share-block {
+  display: flex;
+  justify-content: space-evenly;
+   margin: 1em auto;
+}
+
+.share-block a {
+  padding: 0.25rem 0.5rem;
+}
+
+.facebook {
+  background-color: #3B5998;
+  color: #FFFFFF;
+}
+
+.twitter {
+  background-color: #1DA1F2;
+  color: #FFFFFF;
+}
+
+.linkedin {
+  background-color: #1F88BD;
+  color: #FFFFFF;
+}
+
+.reddit {
+  background-color: white;
+  color: black;
+}
