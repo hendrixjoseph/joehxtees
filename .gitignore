@@ -4,5 +4,6 @@
 _site/
 *.jpg
 *.png
+*.json
 target/
 _site/

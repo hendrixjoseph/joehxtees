@@ -1,6 +1,7 @@
 package com.joehxtees;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -16,6 +17,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -40,9 +42,13 @@ public class TeeProcessor {
 	private static final String SRC = "{{ src }}";
 	private static final String CONTENT = "{{ content }}";
 	private static final String PATH = "{{ path }}";
+	private static final String BASE_PATH_TAG = "{{ base path }}";
 
 	private static final String SITE_DIR = "_site";
 	private static final String IMAGE_FILENAME = "image.jpg";
+	//private static final String BASE_PATH = "https://www.joehxtees.com/";
+	private static final String BASE_PATH = "https://www.joehxblog.com/joehxtees/";
+	//private static final String BASE_PATH = "file:///C:/Users/hendr/git/joehxtees/_site/";
 
 	private final List<Tee> tees;
 	private final Map<Tee, String> teeHtmls;
@@ -124,7 +130,7 @@ public class TeeProcessor {
 
 	public void downloadImages() throws IOException {
 		throwFirstIOException(
-			this.tees.stream()
+			this.tees.parallelStream()
 				.map(throwMapper(this::downloadImage))
 		);
 	}
@@ -170,7 +176,7 @@ public class TeeProcessor {
 		sitemap.write(
 			this.tees.stream()
 				.map(Tee::getPath)
-				.map(path -> "https://www.joehxblog.com/" + path)
+				.map(path -> BASE_PATH + path)
 				.map(url -> "<loc>" + url + "</loc>")
 				.map(locTag -> locTag + lastModTag)
 				.map(tags -> "<url>" + tags + "</url>")
@@ -187,7 +193,7 @@ public class TeeProcessor {
 			.filter(path -> path.toString().endsWith("css") || path.toString().endsWith("js"))
 			.forEach(file -> {
 				try {
-					Files.copy(file, Path.of(SITE_DIR, file.toString()));
+					Files.copy(file, Path.of(SITE_DIR, file.toString()), StandardCopyOption.REPLACE_EXISTING);
 				} catch (final IOException e) {
 					e.printStackTrace();
 				}
@@ -223,8 +229,8 @@ public class TeeProcessor {
 	private String templatize(final String template, final Tee tee) {
 		return template
 				.replace(TITLE, tee.getTitle())
-				//.replace(IMAGE, tee.slug + ".jpg")
-				.replace(SRC, tee.getSrc())
+				.replace(BASE_PATH_TAG, BASE_PATH)
+				.replace(SRC, tee.getSrcWithSlug())
 				.replace(BULLETS, tee.getBullets().stream().collect(Collectors.joining("</li><li>", "<li>", "</li>")));
 	}
 
@@ -236,7 +242,9 @@ public class TeeProcessor {
 		final BufferedImage newImage = eraseBackground(image);
 		final BufferedImage resizedImage = resizeImage(newImage);
 
-		ImageIO.write(resizedImage, "png", new File(dir.toString() + "image.png"));
+		ImageIO.write(resizedImage, "png", new File(dir.toString() + "/image.png"));
+
+		System.out.println(dir.toString() + " written.");
 	}
 
 	private BufferedImage resizeImage(final BufferedImage image) {
@@ -251,11 +259,12 @@ public class TeeProcessor {
 	    return resizedBuffer;
 	}
 
-
 	private BufferedImage eraseBackground(final BufferedImage image) {
 		final BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
-		newImage.setData(image.getData());
+	    final Graphics g = newImage.getGraphics();
+	    g.drawImage(image, 0, 0, null);
+	    g.dispose();
 
 		final Stack<Point> stack = new Stack<>();
 		stack.push(new Point(0,0));

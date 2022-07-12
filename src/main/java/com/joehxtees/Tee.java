@@ -20,7 +20,7 @@ public class Tee {
 
 	public Tee(final String title, final String imageSrc, final String src, final List<String> bullets) {
 		this.title = title;
-		this.slug = title.toLowerCase().replace(' ' , '-').replaceAll("&.+?;|\\?","").replaceAll("-+", "-");
+		this.slug = title.toLowerCase().replace(' ' , '-').replaceAll("&.+;|[^A-Za-z0-9-]","").replaceAll("-+", "-");
 		this.imageSrc = imageSrc;
 		this.src = src;
 		this.bullets.addAll(bullets);
@@ -38,6 +38,11 @@ public class Tee {
 
 	public String getSrc() {
 		return this.src;
+	}
+
+	public String getSrcWithSlug() {
+		final int position = this.src.indexOf("/dp");
+		return this.src.substring(0, position) + "/" + this.slug + this.src.substring(position);
 	}
 
 	public List<String> getBullets() {

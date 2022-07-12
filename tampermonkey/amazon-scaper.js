@@ -27,13 +27,7 @@
               let image = doc.querySelector('#landingImage');
               let title = image.alt;
               let imageSrc = image.getAttribute('data-old-hires');
-
-              let bullets = doc.querySelectorAll('#feature-bullets li');
-              let bullet = [bullets[3].textContent.trim()];
-
-              if (bullets.length === 6) {
-                bullet.push(bullets[4].textContent.trim());
-              }
+              let bullets = Array.from(doc.querySelectorAll('#feature-bullets li')).map(node => node.textContent.trim())
 
               return [title, bullet, imageSrc, url];
             })
