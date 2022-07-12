@@ -43,11 +43,12 @@ public class TeeProcessor {
 	private static final String CONTENT = "{{ content }}";
 	private static final String PATH = "{{ path }}";
 	private static final String BASE_PATH_TAG = "{{ base path }}";
+	private static final String GTAG = "{{ gtag }}";
 
 	private static final String SITE_DIR = "_site";
-	private static final String IMAGE_FILENAME = "image.jpg";
-	//private static final String BASE_PATH = "https://www.joehxtees.com/";
-	private static final String BASE_PATH = "https://www.joehxblog.com/joehxtees/";
+	private static final String IMAGE_FILENAME = "image.png";
+	private static final String BASE_PATH = "https://www.joehxtees.com/";
+	//private static final String BASE_PATH = "https://www.joehxblog.com/joehxtees/";
 	//private static final String BASE_PATH = "file:///C:/Users/hendr/git/joehxtees/_site/";
 
 	private final List<Tee> tees;
@@ -56,6 +57,7 @@ public class TeeProcessor {
 	private final String listTemplate;
 	private final String teeTemplate;
 	private final String detailTemplate;
+	private final String gtag;
 
 	@FunctionalInterface
 	private static interface ExConsumer<T, E extends IOException> {
@@ -99,6 +101,7 @@ public class TeeProcessor {
 		this.listTemplate = Files.readString(Path.of("list.template.html"));
 		this.teeTemplate = Files.readString(Path.of("shirt.template.html"));
 		this.detailTemplate = Files.readString(Path.of("detail.template.html"));
+		this.gtag = Files.readString(Path.of("gtag.html"));
 
 		Files.createDirectories(Paths.get(SITE_DIR));
 
@@ -147,7 +150,9 @@ public class TeeProcessor {
 		final Writer index = new FileWriter(SITE_DIR + "/index.html");
 
 		index.write(
-		  this.listTemplate.replace(CONTENT,
+		  this.listTemplate
+		  	.replace(GTAG, this.gtag)
+		    .replace(CONTENT,
 			this.teeHtmls.entrySet().stream().map(entry -> {
 				final Tee tee = entry.getKey();
 				final String teeHtml = entry.getValue();
@@ -189,8 +194,12 @@ public class TeeProcessor {
 	}
 
 	public void copyStaticFiles() throws IOException {
+		final List<String> filesToCopy = List.of("CNAME","robots.txt");
+
 		Files.list(Path.of(""))
-			.filter(path -> path.toString().endsWith("css") || path.toString().endsWith("js"))
+			.filter(path -> path.toString().endsWith("css")
+						 || path.toString().endsWith("js")
+						 || filesToCopy.contains(path.toString()))
 			.forEach(file -> {
 				try {
 					Files.copy(file, Path.of(SITE_DIR, file.toString()), StandardCopyOption.REPLACE_EXISTING);
@@ -206,6 +215,7 @@ public class TeeProcessor {
 
 	private void createDetailPage(final Tee tee,  final String teeHtml) throws IOException {
 		final String detailHtml = templatize(this.detailTemplate, tee)
+				.replace(GTAG, this.gtag)
 				.replace(CONTENT, teeHtml.replaceAll("##unless-list.+", "")
 				.replace(IMAGE, IMAGE_FILENAME));
 
@@ -232,6 +242,7 @@ public class TeeProcessor {
 				.replace(BASE_PATH_TAG, BASE_PATH)
 				.replace(SRC, tee.getSrcWithSlug())
 				.replace(BULLETS, tee.getBullets().stream().collect(Collectors.joining("</li><li>", "<li>", "</li>")));
+
 	}
 
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
