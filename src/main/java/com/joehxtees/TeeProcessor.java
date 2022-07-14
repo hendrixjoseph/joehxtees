@@ -36,14 +36,15 @@ import javax.imageio.ImageIO;
 import com.google.gson.Gson;
 
 public class TeeProcessor {
-	private static final String TITLE = "{{ title }}";
-	private static final String BULLETS = "{{ bullets }}";
-	private static final String IMAGE = "{{ image }}";
-	private static final String SRC = "{{ src }}";
-	private static final String CONTENT = "{{ content }}";
-	private static final String PATH = "{{ path }}";
-	private static final String BASE_PATH_TAG = "{{ base path }}";
-	private static final String GTAG = "{{ gtag }}";
+
+	private static enum Tag {
+		title, bullets, image, src, content, path, base_path, head, body;
+
+		@Override
+		public String toString() {
+			return "{{ " + this.name().replace('_', ' ') + " }}";
+		}
+	}
 
 	private static final String SITE_DIR = "_site";
 	private static final String IMAGE_FILENAME = "image.png";
@@ -54,10 +55,11 @@ public class TeeProcessor {
 	private final List<Tee> tees;
 	private final Map<Tee, String> teeHtmls;
 
-	private final String listTemplate;
+	private final Template listTemplate;
+	private final Template detailTemplate;
+
+	private final String mainTemplate;
 	private final String teeTemplate;
-	private final String detailTemplate;
-	private final String gtag;
 
 	@FunctionalInterface
 	private static interface ExConsumer<T, E extends IOException> {
@@ -81,6 +83,8 @@ public class TeeProcessor {
 			throwFirstIOException(
 				Files.walk(Path.of(SITE_DIR))
 					.sorted(Comparator.reverseOrder())
+					.filter(path -> !path.toString().contains(".git"))
+					.filter(path -> !path.equals(Path.of(SITE_DIR)))
 					.map(throwMapper(Files::delete))
 			);
 		}
@@ -97,11 +101,31 @@ public class TeeProcessor {
 		}
 	}
 
+	private static class Template {
+		private final String head;
+		private final String body;
+
+		public static Template fromFiles(final String name) throws IOException {
+			return new Template(Files.readString(Path.of(name + ".head.template.html")),
+					            Files.readString(Path.of(name + ".body.template.html")));
+		}
+
+		public Template(final String head, final String body) {
+			this.head = head;
+			this.body = body;
+		}
+
+		public String getBodyWithContent(final String content) {
+			return this.body.replace(Tag.content.toString(), content);
+		}
+	}
+
 	public TeeProcessor() throws IOException {
-		this.listTemplate = Files.readString(Path.of("list.template.html"));
+		this.listTemplate = Template.fromFiles("list");
+		this.detailTemplate = Template.fromFiles("detail");
+
+		this.mainTemplate = Files.readString(Path.of("main.template.html"));
 		this.teeTemplate = Files.readString(Path.of("shirt.template.html"));
-		this.detailTemplate = Files.readString(Path.of("detail.template.html"));
-		this.gtag = Files.readString(Path.of("gtag.html"));
 
 		Files.createDirectories(Paths.get(SITE_DIR));
 
@@ -147,23 +171,25 @@ public class TeeProcessor {
 	}
 
 	public void createIndex() throws IOException {
+
+
+		final String content = this.teeHtmls.entrySet().stream().map(entry -> {
+			final Tee tee = entry.getKey();
+			final String teeHtml = entry.getValue();
+
+			 return teeHtml
+				 .replace("##unless-list", "")
+				 .replace(Tag.path.toString(), tee.getPath())
+				 .replace(Tag.image.toString(), tee.getPath() + IMAGE_FILENAME);
+		}).collect(Collectors.joining());
+
+		final String body = this.listTemplate.getBodyWithContent(content);
+
+		final String indexHtml = this.createPage(this.listTemplate.head, body);
+
 		final Writer index = new FileWriter(SITE_DIR + "/index.html");
 
-		index.write(
-		  this.listTemplate
-		  	.replace(GTAG, this.gtag)
-		    .replace(CONTENT,
-			this.teeHtmls.entrySet().stream().map(entry -> {
-				final Tee tee = entry.getKey();
-				final String teeHtml = entry.getValue();
-
-				 return teeHtml
-					 .replace("##unless-list", "")
-					 .replace(PATH, tee.getPath())
-					 .replace(IMAGE, tee.getPath() + IMAGE_FILENAME);
-			}).collect(Collectors.joining())
-		  )
-	    );
+		index.write(indexHtml);
 
 		index.close();
 	}
@@ -214,10 +240,12 @@ public class TeeProcessor {
 	}
 
 	private void createDetailPage(final Tee tee,  final String teeHtml) throws IOException {
-		final String detailHtml = templatize(this.detailTemplate, tee)
-				.replace(GTAG, this.gtag)
-				.replace(CONTENT, teeHtml.replaceAll("##unless-list.+", "")
-				.replace(IMAGE, IMAGE_FILENAME));
+		final String head = templatize(this.detailTemplate.head, tee);
+		final String body = this.detailTemplate.getBodyWithContent(teeHtml
+													.replaceAll("##unless-list.+", "")
+													.replace(Tag.image.toString(), IMAGE_FILENAME));
+
+		final String detailHtml = createPage(head, body);
 
 		final Path dir = createTeeDirectory(tee);
 
@@ -238,11 +266,15 @@ public class TeeProcessor {
 
 	private String templatize(final String template, final Tee tee) {
 		return template
-				.replace(TITLE, tee.getTitle())
-				.replace(BASE_PATH_TAG, BASE_PATH)
-				.replace(SRC, tee.getSrcWithSlug())
-				.replace(BULLETS, tee.getBullets().stream().collect(Collectors.joining("</li><li>", "<li>", "</li>")));
+				.replace(Tag.title.toString(), tee.getTitle())
+				.replace(Tag.base_path.toString(), BASE_PATH)
+				.replace(Tag.src.toString(), tee.getSrcWithSlug())
+				.replace(Tag.bullets.toString(), tee.getBullets().stream().collect(Collectors.joining("</li><li>", "<li>", "</li>")));
 
+	}
+
+	private String createPage(final String head, final String body) {
+		return this.mainTemplate.replace(Tag.head.toString(), head).replace(Tag.body.toString(), body);
 	}
 
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
