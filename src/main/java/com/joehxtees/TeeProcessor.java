@@ -185,7 +185,7 @@ public class TeeProcessor {
 
 		final String body = this.listTemplate.getBodyWithContent(content);
 
-		final String indexHtml = this.createPage(this.listTemplate.head, body);
+		final String indexHtml = this.createPage(this.listTemplate.head, body, "List of T-Shirts");
 
 		final Writer index = new FileWriter(SITE_DIR + "/index.html");
 
@@ -245,7 +245,7 @@ public class TeeProcessor {
 													.replaceAll("##unless-list.+", "")
 													.replace(Tag.image.toString(), IMAGE_FILENAME));
 
-		final String detailHtml = createPage(head, body);
+		final String detailHtml = createPage(head, body, tee.getTitle());
 
 		final Path dir = createTeeDirectory(tee);
 
@@ -273,8 +273,10 @@ public class TeeProcessor {
 
 	}
 
-	private String createPage(final String head, final String body) {
-		return this.mainTemplate.replace(Tag.head.toString(), head).replace(Tag.body.toString(), body);
+	private String createPage(final String head, final String body, final String title) {
+		return this.mainTemplate.replace(Tag.title.toString(), title)
+								.replace(Tag.head.toString(), head)
+								.replace(Tag.body.toString(), body);
 	}
 
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
