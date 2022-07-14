@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +190,7 @@ public class TeeProcessor {
 
 		final Writer index = new FileWriter(SITE_DIR + "/index.html");
 
-		index.write(indexHtml);
+		index.write(minify(indexHtml));
 
 		index.close();
 	}
@@ -235,6 +236,13 @@ public class TeeProcessor {
 			});
 	}
 
+	private String minify(final String string) {
+		return Arrays.stream(string.split("\n"))
+					 .filter(s -> !s.isBlank())
+					 .map(String::trim)
+					 .collect(Collectors.joining());
+	}
+
 	private void createDetailPage(final Entry<Tee, String> entry) throws IOException {
 		createDetailPage(entry.getKey(), entry.getValue());
 	}
@@ -251,7 +259,7 @@ public class TeeProcessor {
 
 		final Writer detail = new FileWriter(dir.toString() + "/index.html");
 
-		detail.write(detailHtml);
+		detail.write(minify(detailHtml));
 
 		detail.close();
 	}
