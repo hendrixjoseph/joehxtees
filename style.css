@@ -5,13 +5,25 @@ html, body {
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-areas:
+    'header'
+    'main'
+    'footer';
+  grid-template-rows: auto 1fr auto;
+}
+
+header {
+  grid-area: header;
+}
+
+main {
+  grid-area: main;
 }
 
 footer {
   margin: 0.5rem;
+  grid-area: footer;
 }
 
 h1, h2, header, footer {
