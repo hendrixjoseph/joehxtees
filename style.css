@@ -5,13 +5,25 @@ html, body {
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-areas:
+    'header'
+    'main'
+    'footer';
+  grid-template-rows: auto 1fr auto;
+}
+
+header {
+  grid-area: header;
+}
+
+main {
+  grid-area: main;
 }
 
 footer {
   margin: 0.5rem;
+  grid-area: footer;
 }
 
 h1, h2, header, footer {
@@ -21,34 +33,51 @@ h1, h2, header, footer {
 img {
   margin: 0 auto;
   display: block;
+  max-width: 100%;
+}
+
+svg {
+  height: 1rem;
+  fill: #FFFFFF;
+}
+
+.shirt {
+  padding: 0.5rem;
+  margin: 0.5rem;
 }
 
 .share-block {
   display: flex;
   justify-content: space-evenly;
-   margin: 1em auto;
+  margin: 1em auto;
 }
 
 .share-block a {
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.25rem;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.share-block a svg, .share-block a span {
+  padding: 0 0.25rem;
 }
 
 .facebook {
   background-color: #3B5998;
-  color: #FFFFFF;
 }
 
 .twitter {
   background-color: #1DA1F2;
-  color: #FFFFFF;
 }
 
 .linkedin {
   background-color: #1F88BD;
-  color: #FFFFFF;
+}
+
+.pinterest {
+  background-color: #DC0000;
 }
 
 .reddit {
-  background-color: white;
-  color: black;
+  background-color: #FF4300;
 }

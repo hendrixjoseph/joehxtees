@@ -186,7 +186,7 @@ public class TeeProcessor {
 
 		final String body = this.listTemplate.getBodyWithContent(content);
 
-		final String indexHtml = this.createPage(this.listTemplate.head, body, "List of T-Shirts");
+		final String indexHtml = this.createPage(this.listTemplate.head, body, "List of T-Shirts", "");
 
 		final Writer index = new FileWriter(SITE_DIR + "/index.html");
 
@@ -253,7 +253,7 @@ public class TeeProcessor {
 													.replaceAll("##unless-list.+", "")
 													.replace(Tag.image.toString(), IMAGE_FILENAME));
 
-		final String detailHtml = createPage(head, body, tee.getTitle());
+		final String detailHtml = createPage(head, body, tee.getTitle(), tee.getPath());
 
 		final Path dir = createTeeDirectory(tee);
 
@@ -275,14 +275,16 @@ public class TeeProcessor {
 	private String templatize(final String template, final Tee tee) {
 		return template
 				.replace(Tag.title.toString(), tee.getTitle())
-				.replace(Tag.base_path.toString(), BASE_PATH)
+				.replace(Tag.base_path.toString(), BASE_PATH) // TODO: Remove this line
+				.replace(Tag.path.toString(), tee.getPath())
 				.replace(Tag.src.toString(), tee.getSrcWithSlug())
 				.replace(Tag.bullets.toString(), tee.getBullets().stream().collect(Collectors.joining("</li><li>", "<li>", "</li>")));
 
 	}
 
-	private String createPage(final String head, final String body, final String title) {
+	private String createPage(final String head, final String body, final String title, final String path) {
 		return this.mainTemplate.replace(Tag.title.toString(), title)
+								.replace(Tag.path.toString(), path)
 								.replace(Tag.head.toString(), head)
 								.replace(Tag.body.toString(), body);
 	}
