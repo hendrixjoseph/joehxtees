@@ -36,6 +36,10 @@ img {
   max-width: 100%;
 }
 
+svg {
+  height: 1rem;
+}
+
 .shirt {
   padding: 0.5rem;
   margin: 0.5rem;
@@ -44,7 +48,7 @@ img {
 .share-block {
   display: flex;
   justify-content: space-evenly;
-   margin: 1em auto;
+  margin: 1em auto;
 }
 
 .share-block a {
@@ -66,7 +70,12 @@ img {
   color: #FFFFFF;
 }
 
+.pinterest {
+  background-color: #DC0000;
+  color: #FFFFFF;
+}
+
 .reddit {
-  background-color: white;
-  color: black;
+  background-color: #FF4300;
+  color: #FFFFFF;
 }
