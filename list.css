@@ -13,9 +13,7 @@ main {
 }
 
 .shirt {
-  padding: 0.5rem;
-  margin: 0.5rem;
-  width: min(50%, 500px);
+  width: min(100%, 500px);
 }
 
 .shirt:hover {

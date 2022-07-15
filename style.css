@@ -33,6 +33,12 @@ h1, h2, header, footer {
 img {
   margin: 0 auto;
   display: block;
+  max-width: 100%;
+}
+
+.shirt {
+  padding: 0.5rem;
+  margin: 0.5rem;
 }
 
 .share-block {
