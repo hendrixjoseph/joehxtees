@@ -38,6 +38,7 @@ img {
 
 svg {
   height: 1rem;
+  fill: #FFFFFF;
 }
 
 .shirt {
@@ -53,29 +54,30 @@ svg {
 
 .share-block a {
   padding: 0.25rem 0.5rem;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.share-block a svg, .share-block a span {
+    
 }
 
 .facebook {
   background-color: #3B5998;
-  color: #FFFFFF;
 }
 
 .twitter {
   background-color: #1DA1F2;
-  color: #FFFFFF;
 }
 
 .linkedin {
   background-color: #1F88BD;
-  color: #FFFFFF;
 }
 
 .pinterest {
   background-color: #DC0000;
-  color: #FFFFFF;
 }
 
 .reddit {
   background-color: #FF4300;
-  color: #FFFFFF;
 }
