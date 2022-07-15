@@ -10,8 +10,8 @@ public class Main {
 
 		final TeeProcessor processor = new TeeProcessor();
 
-		processor.createDetailPages();
-		processor.createIndex();
+//		processor.createDetailPages();
+//		processor.createIndex();
 //		processor.createSiteMap();
 		processor.copyStaticFiles();
 //		processor.downloadImages();

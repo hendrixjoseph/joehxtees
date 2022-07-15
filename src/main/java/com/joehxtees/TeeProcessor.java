@@ -1,19 +1,12 @@
 package com.joehxtees;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,12 +20,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 
@@ -292,62 +282,13 @@ public class TeeProcessor {
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
 		final Path dir = createTeeDirectory(tee);
 
-		final BufferedImage image = ImageIO.read(new URL(tee.getImageSrc()));
+		final BufferedImage image = ImageProcessor.read(tee.getImageSrc());
 
-		final BufferedImage newImage = eraseBackground(image);
-		final BufferedImage resizedImage = resizeImage(newImage);
+		final BufferedImage newImage = ImageProcessor.eraseBackground(image);
+		final BufferedImage resizedImage = ImageProcessor.resizeImage(newImage);
 
-		ImageIO.write(resizedImage, "png", new File(dir.toString() + "/image.png"));
+		ImageProcessor.write(dir.toString(),  resizedImage);
 
 		System.out.println(dir.toString() + " written.");
-	}
-
-	private BufferedImage resizeImage(final BufferedImage image) {
-		final Image resized = image.getScaledInstance(700, -1, Image.SCALE_SMOOTH);
-
-		final BufferedImage resizedBuffer = new BufferedImage(resized.getWidth(null), resized.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-	    final Graphics2D g2d = resizedBuffer.createGraphics();
-	    g2d.drawImage(resized, 0, 0, null);
-	    g2d.dispose();
-
-	    return resizedBuffer;
-	}
-
-	private BufferedImage eraseBackground(final BufferedImage image) {
-		final BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-
-	    final Graphics g = newImage.getGraphics();
-	    g.drawImage(image, 0, 0, null);
-	    g.dispose();
-
-		final Stack<Point> stack = new Stack<>();
-		stack.push(new Point(0,0));
-
-		while (!stack.isEmpty()) {
-			final Point point = stack.pop();
-
-			if (point.x >= 0 && point.x < newImage.getWidth()
-					&& point.y >= 0 && point.y < newImage.getHeight()) {
-
-				final Color color = new Color(newImage.getRGB(point.x, point.y), true);
-
-				final float brightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
-
-				if (brightness > 0.75 && color.getAlpha() == 255) {
-					final int alpha = (int) (256.0 * brightness);
-					final Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 256 - alpha);
-
-					newImage.setRGB(point.x, point.y, newColor.getRGB());
-
-					stack.push(new Point(point.x + 1, point.y    ));
-					stack.push(new Point(point.x    , point.y + 1));
-					stack.push(new Point(point.x - 1, point.y    ));
-					stack.push(new Point(point.x    , point.y - 1));
-				}
-			}
-		}
-
-		return newImage;
 	}
 }
