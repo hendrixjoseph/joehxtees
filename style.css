@@ -53,13 +53,13 @@ svg {
 }
 
 .share-block a {
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.25rem;
   text-decoration: none;
   color: #FFFFFF;
 }
 
 .share-block a svg, .share-block a span {
-    
+  padding: 0 0.25rem;
 }
 
 .facebook {
