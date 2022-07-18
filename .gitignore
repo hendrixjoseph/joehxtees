@@ -5,6 +5,7 @@ _site/
 *.jpg
 *.png
 !template.png
+!favicons/*
 *.json
 target/
 _site/

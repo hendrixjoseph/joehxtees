@@ -211,15 +211,10 @@ public class TeeProcessor {
 	}
 
 	public void copyStaticFiles() throws IOException {
-		final List<String> filesToCopy = List.of("CNAME","robots.txt");
-
-		Files.list(Path.of(""))
-			.filter(path -> path.toString().endsWith("css")
-						 || path.toString().endsWith("js")
-						 || filesToCopy.contains(path.toString()))
+		Files.list(Path.of("static"))
 			.forEach(file -> {
 				try {
-					Files.copy(file, Path.of(SITE_DIR, file.toString()), StandardCopyOption.REPLACE_EXISTING);
+					Files.copy(file, Path.of(SITE_DIR, file.getFileName().toString()), StandardCopyOption.REPLACE_EXISTING);
 				} catch (final IOException e) {
 					e.printStackTrace();
 				}
