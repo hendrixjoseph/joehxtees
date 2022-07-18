@@ -23,10 +23,6 @@ img {
   margin: 0 auto;
 }
 
-.shirt div:nth-child(2) {
-  margin-top: 65px;
-}
-
 .share-block {
   max-width: 700px;
 }
@@ -35,6 +31,12 @@ img {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  text-align: center;
+}
+
+.similar-shirts div {
+  width: max(300px, 50%);
+  max-width: 100%;
 }
 
 .similar-shirts img {
