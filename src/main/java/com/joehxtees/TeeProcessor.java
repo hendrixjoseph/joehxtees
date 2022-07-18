@@ -282,7 +282,7 @@ public class TeeProcessor {
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
 		final Path dir = createTeeDirectory(tee);
 
-		final BufferedImage image = ImageProcessor.read(tee.getImageSrc());
+		final BufferedImage image = ImageProcessor.readFromUrl(tee.getImageSrc());
 
 		final BufferedImage newImage = ImageProcessor.eraseBackground(image);
 		final BufferedImage resizedImage = ImageProcessor.resizeImage(newImage);

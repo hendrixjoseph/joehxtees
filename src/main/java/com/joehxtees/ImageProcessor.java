@@ -17,12 +17,20 @@ import javax.imageio.ImageIO;
 
 public class ImageProcessor {
 
-	public static BufferedImage read(final String src) throws MalformedURLException, IOException {
+	public static BufferedImage readFromFile(final String filename) throws IOException {
+		return ImageIO.read(new File(filename));
+	}
+
+	public static BufferedImage readFromUrl(final String src) throws MalformedURLException, IOException {
 		return ImageIO.read(new URL(src));
 	}
 
 	public static void write(final String path, final RenderedImage image) throws IOException {
-		ImageIO.write(image, "png", new File(path + "/image.png"));
+		write(path, "image.png", image);
+	}
+
+	public static void write(final String path, final String filename, final RenderedImage image) throws IOException {
+		ImageIO.write(image, "png", new File(path + File.separatorChar + filename));
 	}
 
 	public static BufferedImage resizeImage(final Image image) {
@@ -37,7 +45,36 @@ public class ImageProcessor {
 	    return resizedBuffer;
 	}
 
-	public static BufferedImage eraseBackground(final Image image) {
+	public static BufferedImage eraseBackground(final Image image) throws IOException {
+		final BufferedImage newImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+	    final Graphics g = newImage.getGraphics();
+	    g.drawImage(image, 0, 0, null);
+	    g.dispose();
+
+	    final BufferedImage template = readFromFile("template.png");
+
+	    for (int x = 0; x < newImage.getWidth(); x++) {
+	    	for (int y = 0; y < newImage.getHeight(); y++) {
+
+	    		final Color oldColor = new Color(newImage.getRGB(x, y));
+	    		final Color templateColor = new Color(template.getRGB(x, y), true);
+	    		final Color newColor = new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(), templateColor.getAlpha());
+
+    			newImage.setRGB(x, y, newColor.getRGB());
+
+	    	}
+	    }
+
+	    return newImage;
+
+	}
+
+	private static boolean isWhite(final int rgb) {
+		return Color.WHITE.equals(new Color(rgb));
+	}
+
+	public static BufferedImage eraseBackground2(final Image image) {
 		final BufferedImage newImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
 	    final Graphics g = newImage.getGraphics();

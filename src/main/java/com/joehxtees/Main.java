@@ -6,15 +6,15 @@ public class Main {
 
 	public static void main(final String[] args) throws IOException {
 
-//		TeeProcessor.delete();
+		TeeProcessor.delete();
 
 		final TeeProcessor processor = new TeeProcessor();
 
-//		processor.createDetailPages();
-//		processor.createIndex();
-//		processor.createSiteMap();
+		processor.createDetailPages();
+		processor.createIndex();
+		processor.createSiteMap();
 		processor.copyStaticFiles();
-//		processor.downloadImages();
+		//processor.downloadImages();
 
 		System.out.println("Done!");
 	}
