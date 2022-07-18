@@ -1,3 +1,8 @@
+header a, .similar-shirts a {
+  text-decoration: none;
+  color: inherit;
+}
+
 ul {
   margin-left: auto;
   margin-right: auto;
@@ -24,4 +29,14 @@ img {
 
 .share-block {
   max-width: 700px;
+}
+
+.similar-shirts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.similar-shirts img {
+  width: 175px;
 }
