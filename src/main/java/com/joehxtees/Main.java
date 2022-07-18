@@ -13,7 +13,7 @@ public class Main {
 		processor.createDetailPages();
 		//processor.createIndex();
 		//processor.createSiteMap();
-		//processor.copyStaticFiles();
+		processor.copyStaticFiles();
 		//processor.downloadImages();
 
 		System.out.println("Done!");

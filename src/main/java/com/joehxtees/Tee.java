@@ -1,14 +1,18 @@
 package com.joehxtees;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 
 public class Tee {
 	private static final Map<String, Integer> SAME_TEE_COUNT = new HashMap<>();
+	private static final Map<String, List<Tee>> SIMILAR_TEE_MAP = new HashMap<>();
 
 	private final int slugId;
 
@@ -26,6 +30,10 @@ public class Tee {
 		this.bullets.addAll(bullets);
 
 		this.slugId = SAME_TEE_COUNT.compute(this.slug, (k,v) -> v == null ? 0 : v + 1);
+
+		Arrays.stream(this.slug.split("-"))
+			  .filter(s -> !List.of("the").contains(s))
+			  .forEach(s -> SIMILAR_TEE_MAP.computeIfAbsent(s, k -> new ArrayList<>()).add(this));
 	}
 
 	public String getTitle() {
@@ -52,6 +60,18 @@ public class Tee {
 	public String getPath() {
 		final String slugId = this.slugId == 0 ? "" : this.slugId + "/";
 		return this.slug + "/" + slugId;
+	}
+
+	public List<Tee> getSimilarTees(final long maxsize) {
+		return Arrays.stream(this.slug.split("-"))
+			  .map(s -> SIMILAR_TEE_MAP.get(s))
+			  .filter(Objects::nonNull)
+			  .flatMap(List::stream)
+			  .distinct()
+			  .filter(tee -> !tee.equals(this))
+			  .limit(maxsize)
+			  .collect(Collectors.toList());
+
 	}
 
 	@Override

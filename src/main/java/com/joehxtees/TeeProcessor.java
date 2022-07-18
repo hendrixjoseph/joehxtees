@@ -29,7 +29,7 @@ import com.google.gson.Gson;
 public class TeeProcessor {
 
 	private static enum Tag {
-		title, bullets, image, src, content, path, base_path, head, body;
+		title, bullets, image, src, content, path, base_path, head, body, similar_tees;
 
 		@Override
 		public String toString() {
@@ -238,7 +238,23 @@ public class TeeProcessor {
 													.replaceAll("##unless-list.+", "")
 													.replace(Tag.image.toString(), IMAGE_FILENAME));
 
-		final String detailHtml = createPage(head, body, tee.getTitle(), tee.getPath());
+		final String similarTeesHtml =
+				"<h3>Similar Shirts</h3><div class='similar-shirts'>"
+				+ tee.getSimilarTees(2).stream()
+				.map(t -> ("<div><a href='/"
+						+ t.getPath()
+						+ "'><h4>"
+						+ t.getTitle()
+						+ "</h4><img src='/"
+						+ t.getPath()
+						+ "image.png' width='700' height='711' /></a></div>"))
+				.collect(Collectors.joining())
+				+ "</div>";
+
+		final String detailHtml = createPage(head,
+				body.replace(Tag.similar_tees.toString(), similarTeesHtml),
+				tee.getTitle(),
+				tee.getPath());
 
 		final Path dir = createTeeDirectory(tee);
 

@@ -1,3 +1,12 @@
+header a, .similar-shirts a {
+  text-decoration: none;
+  color: inherit;
+}
+
+h3 {
+  text-align: center;
+}
+
 ul {
   margin-left: auto;
   margin-right: auto;
@@ -18,10 +27,22 @@ img {
   margin: 0 auto;
 }
 
-.shirt div:nth-child(2) {
-  margin-top: 65px;
-}
-
 .share-block {
   max-width: 700px;
+}
+
+.similar-shirts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.similar-shirts div {
+  width: max(300px, 50%);
+  max-width: 100%;
+}
+
+.similar-shirts img {
+  width: 175px;
 }
