@@ -3,6 +3,10 @@ header a, .similar-shirts a {
   color: inherit;
 }
 
+h3 {
+  text-align: center;
+}
+
 ul {
   margin-left: auto;
   margin-right: auto;
