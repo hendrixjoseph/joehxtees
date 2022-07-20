@@ -289,7 +289,8 @@ public class TeeProcessor {
 		return this.mainTemplate.replace(Tag.title.toString(), title)
 								.replace(Tag.path.toString(), path)
 								.replace(Tag.head.toString(), head)
-								.replace(Tag.body.toString(), body);
+								.replace(Tag.body.toString(), body)
+								.replaceAll("\\{\\{.+?\\}\\}", "");
 	}
 
 	private void downloadImage(final Tee tee) throws MalformedURLException, IOException {
