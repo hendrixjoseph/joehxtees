@@ -26,7 +26,7 @@ public class ImageProcessor {
 	}
 
 	public static void write(final String path, final RenderedImage image) throws IOException {
-		write(path, "image.png", image);
+		write(path, "share-image.png", image);
 	}
 
 	public static void write(final String path, final String filename, final RenderedImage image) throws IOException {

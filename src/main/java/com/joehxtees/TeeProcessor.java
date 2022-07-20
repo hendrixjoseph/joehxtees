@@ -195,6 +195,8 @@ public class TeeProcessor {
 				+ LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
 				+ "</lastmod>";
 
+		sitemap.write("<url><loc>https://www.joehxtees.com/</loc>" + lastModTag + "</url>");
+
 		sitemap.write(
 			this.tees.stream()
 				.map(Tee::getPath)
@@ -298,7 +300,8 @@ public class TeeProcessor {
 		final BufferedImage newImage = ImageProcessor.eraseBackground(image);
 		final BufferedImage resizedImage = ImageProcessor.resizeImage(newImage);
 
-		ImageProcessor.write(dir.toString(),  resizedImage);
+		ImageProcessor.write(dir.toString(), "image.png", resizedImage);
+		ImageProcessor.write(dir.toString(), "share-image.png", image);
 
 		System.out.println(dir.toString() + " written.");
 	}
