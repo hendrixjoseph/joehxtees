@@ -25,6 +25,8 @@ img {
 
 .shirt > div {
   margin: 0 auto;
+  width: 45%;
+  min-width: min(700px, 100%);
 }
 
 .share-block {
