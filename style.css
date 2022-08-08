@@ -50,13 +50,13 @@ svg {
 
 .share-block {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   flex-wrap: wrap;
   margin: 1em -8px;
 }
 
 .share-block a {
-  padding: 0.25rem 0.25rem;
+  padding: 0.5rem;
   margin: 0.5rem 8px;
   text-decoration: none;
   color: #FFFFFF;
