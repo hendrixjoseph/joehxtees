@@ -52,12 +52,12 @@ svg {
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
-  margin: 1em auto;
+  margin: 1em -8px;
 }
 
 .share-block a {
   padding: 0.25rem 0.25rem;
-  margin: 0.5rem 0;
+  margin: 0.5rem 8px;
   text-decoration: none;
   color: #FFFFFF;
   display: flex;
