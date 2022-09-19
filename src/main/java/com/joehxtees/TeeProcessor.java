@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.parser.Parser;
 
 import com.google.gson.Gson;
 
@@ -47,6 +49,9 @@ public class TeeProcessor {
 	private static final String BASE_PATH = "https://www.joehxtees.com/";
 	//private static final String BASE_PATH = "https://www.joehxblog.com/joehxtees/";
 	//private static final String BASE_PATH = "file:///C:/Users/hendr/git/joehxtees/_site/";
+	
+	private final String NOW = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+	private final String LAST_MOD_TAG = "<lastmod>" + NOW + "</lastmod>";
 
 	private final List<Tee> tees;
 	private final Map<Tee, String> teeHtmls;
@@ -205,28 +210,40 @@ public class TeeProcessor {
 
 		index.close();
 	}
+	
+	private String getSiteMapUrlSetContent() {	    
+	    return this.tees.stream()
+                .map(Tee::getPath)
+                .map(path -> BASE_PATH + path)
+                .map(url -> "<loc>" + url + "</loc>")
+                .map(locTag -> locTag + LAST_MOD_TAG)
+                .map(tags -> "<url>" + tags + "</url>")
+                .collect(Collectors.joining());
+	}
+	
+	public void updateSiteMap() throws IOException {
+	    File file = new File(SITE_DIR + "/sitemap.xml");
+	    Document doc = Jsoup.parse(file, null, "",  Parser.xmlParser());
+	    
+	    Element urlset = doc.getElementsByTag("urlset").get(0);
+	    urlset.append(this.getSiteMapUrlSetContent());
+	    
+	    Element indexLastModNode = urlset.firstElementChild().lastElementChild();
+	    indexLastModNode.text(NOW);	    
+	    
+	    final Writer sitemap = new FileWriter(file);
+	    sitemap.write(doc.toString());
+	    sitemap.close();
+	}
 
 	public void createSiteMap() throws IOException {
 		final Writer sitemap = new FileWriter(SITE_DIR + "/sitemap.xml");
 
 		sitemap.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		sitemap.write("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+		sitemap.write("<url><loc>https://www.joehxtees.com/</loc>" + LAST_MOD_TAG + "</url>");
 
-		final String lastModTag = "<lastmod>"
-				+ LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-				+ "</lastmod>";
-
-		sitemap.write("<url><loc>https://www.joehxtees.com/</loc>" + lastModTag + "</url>");
-
-		sitemap.write(
-			this.tees.stream()
-				.map(Tee::getPath)
-				.map(path -> BASE_PATH + path)
-				.map(url -> "<loc>" + url + "</loc>")
-				.map(locTag -> locTag + lastModTag)
-				.map(tags -> "<url>" + tags + "</url>")
-				.collect(Collectors.joining())
-		);
+		sitemap.write(getSiteMapUrlSetContent());
 
 		sitemap.write("</urlset>");
 
