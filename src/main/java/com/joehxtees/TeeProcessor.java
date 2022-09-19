@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import com.google.gson.Gson;
 
@@ -181,7 +182,8 @@ public class TeeProcessor {
 	    File index = new File(SITE_DIR + "/index.html");
 	    Document doc = Jsoup.parse(index);
 	    
-	    doc.append(getIndexContent());
+	    Element main = doc.getElementsByTag("main").get(0);
+	    main.prepend(getIndexContent().replaceAll("\\{\\{.+?\\}\\}", ""));
 	    
 	    Writer writer = new FileWriter(index);
 	    
