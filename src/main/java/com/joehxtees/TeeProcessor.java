@@ -1,6 +1,7 @@
 package com.joehxtees;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,6 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import com.google.gson.Gson;
 
 public class TeeProcessor {
@@ -38,7 +42,7 @@ public class TeeProcessor {
 	}
 
 	private static final String SITE_DIR = "_site";
-	private static final String IMAGE_FILENAME = "image.png";
+	private static final String IMAGE_FILENAME = "image.webp";
 	private static final String BASE_PATH = "https://www.joehxtees.com/";
 	//private static final String BASE_PATH = "https://www.joehxblog.com/joehxtees/";
 	//private static final String BASE_PATH = "file:///C:/Users/hendr/git/joehxtees/_site/";
@@ -160,19 +164,34 @@ public class TeeProcessor {
 				.map(throwMapper(this::createDetailPage))
 		);
 	}
+	
+	private String getIndexContent() {
+	    return this.teeHtmls.entrySet().stream().map(entry -> {
+            final Tee tee = entry.getKey();
+            final String teeHtml = entry.getValue();
+
+             return teeHtml
+                 .replace("##unless-list", "")
+                 .replace(Tag.path.toString(), tee.getPath())
+                 .replace(Tag.image.toString(), tee.getPath() + IMAGE_FILENAME);
+        }).collect(Collectors.joining());
+	}
+	
+	public void updateIndex() throws IOException {
+	    File index = new File(SITE_DIR + "/index.html");
+	    Document doc = Jsoup.parse(index);
+	    
+	    doc.append(getIndexContent());
+	    
+	    Writer writer = new FileWriter(index);
+	    
+	    writer.write(doc.toString());
+	    
+	    writer.close();
+	}
 
 	public void createIndex() throws IOException {
-
-
-		final String content = this.teeHtmls.entrySet().stream().map(entry -> {
-			final Tee tee = entry.getKey();
-			final String teeHtml = entry.getValue();
-
-			 return teeHtml
-				 .replace("##unless-list", "")
-				 .replace(Tag.path.toString(), tee.getPath())
-				 .replace(Tag.image.toString(), tee.getPath() + IMAGE_FILENAME);
-		}).collect(Collectors.joining());
+		final String content = getIndexContent();
 
 		final String body = this.listTemplate.getBodyWithContent(content);
 
@@ -249,7 +268,7 @@ public class TeeProcessor {
 						+ t.getTitle()
 						+ "</h4><img src='/"
 						+ t.getPath()
-						+ "image.png' width='700' height='711' /></a></div>"))
+						+ "image.webp' width='700' height='711' /></a></div>"))
 				.collect(Collectors.joining())
 				+ "</div>";
 
@@ -301,8 +320,8 @@ public class TeeProcessor {
 		final BufferedImage newImage = ImageProcessor.eraseBackground(image);
 		final BufferedImage resizedImage = ImageProcessor.resizeImage(newImage);
 
-		ImageProcessor.write(dir.toString(), "image.png", resizedImage);
-		ImageProcessor.write(dir.toString(), "share-image.png", image);
+		ImageProcessor.write(dir.toString(), "image.webp", resizedImage);
+		ImageProcessor.write(dir.toString(), "share-image.webp", image);
 
 		System.out.println(dir.toString() + " written.");
 	}
